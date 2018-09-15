@@ -1,0 +1,26 @@
+[Unit]
+Description=COFFEECOIN's distributed currency daemon
+After=network.target
+
+[Service]
+User=coffeecoin
+Group=coffeecoin
+
+Type=forking
+PIDFile=/var/lib/coffeecoind/coffeecoind.pid
+
+ExecStart=/usr/bin/coffeecoind -daemon -pid=/var/lib/coffeecoind/coffeecoind.pid \
+          -conf=/etc/coffeecoin/coffeecoin.conf -datadir=/var/lib/coffeecoind
+
+ExecStop=-/usr/bin/coffeecoin-cli -conf=/etc/coffeecoin/coffeecoin.conf \
+         -datadir=/var/lib/coffeecoind stop
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

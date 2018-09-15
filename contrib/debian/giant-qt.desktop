@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=COFFEECOIN
+Comment=COFFEECOIN P2P Cryptocurrency
+Comment[fr]=COFFEECOIN, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=COFFEECOIN, eşten eşe kriptografik sanal para birimi
+Exec=coffeecoin-qt %u
+Terminal=false
+Type=Application
+Icon=coffeecoin128
+MimeType=x-scheme-handler/coffeecoin;
+Categories=Office;Finance;

@@ -1,0 +1,20 @@
+<!DOCTYPE RCC><RCC version="1.0">
+    <qresource prefix="/translations">
+        <file alias="bg">locale/coffeecoin_bg.qm</file>
+        <file alias="de">locale/coffeecoin_de.qm</file>
+        <file alias="en">locale/coffeecoin_en.qm</file>
+        <file alias="es">locale/coffeecoin_es.qm</file>
+        <file alias="fi">locale/coffeecoin_fi.qm</file>
+        <file alias="fr">locale/coffeecoin_fr.qm</file>
+        <file alias="it">locale/coffeecoin_it.qm</file>
+        <file alias="ja">locale/coffeecoin_ja.qm</file>
+        <file alias="pl">locale/coffeecoin_pl.qm</file>
+        <file alias="pt">locale/coffeecoin_pt.qm</file>
+        <file alias="ru">locale/coffeecoin_ru.qm</file>
+        <file alias="sk">locale/coffeecoin_sk.qm</file>
+        <file alias="sv">locale/coffeecoin_sv.qm</file>
+        <file alias="vi">locale/coffeecoin_vi.qm</file>
+        <file alias="zh_CN">locale/coffeecoin_zh_CN.qm</file>
+        <file alias="zh_TW">locale/coffeecoin_zh_TW.qm</file>
+    </qresource>
+</RCC>
