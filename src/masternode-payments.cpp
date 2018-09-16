@@ -24,7 +24,9 @@ CMasternodePayments masternodePayments;
 CCriticalSection cs_vecPayments;
 CCriticalSection cs_mapMasternodeBlocks;
 CCriticalSection cs_mapMasternodePayeeVotes;
-
+bool enforceDevFee = false;
+CAmount developerfeePayment;
+CScript developerfeescriptpubkey;
 //
 // CMasternodePaymentDB
 //
@@ -280,9 +282,8 @@ std::string GetRequiredPaymentsString(int nBlockHeight)
     }
 }
 
-void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFees, bool fProofOfStake)
-{
-    CBlockIndex* pindexPrev = chainActive.Tip();
+void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFees, bool fProofOfStake) {
+    CBlockIndex *pindexPrev = chainActive.Tip();
     if (!pindexPrev) return;
 
     bool hasPayment = true;
@@ -291,7 +292,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
     //spork
     if (!masternodePayments.GetBlockPayee(pindexPrev->nHeight + 1, payee)) {
         //no masternode detected
-        CMasternode* winningNode = mnodeman.GetCurrentMasterNode(1);
+        CMasternode *winningNode = mnodeman.GetCurrentMasterNode(1);
         if (winningNode) {
             payee = GetScriptForDestination(winningNode->pubKeyCollateralAddress.GetID());
         } else {
@@ -300,12 +301,18 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
         }
     }
 
-    CAmount blockValue = GetBlockValue(pindexPrev->nHeight +1 );
-    CAmount masternodePayment = GetMasternodePayment(pindexPrev->nHeight +1, blockValue);
-    CAmount developerfeePayment = blockValue * 0.05;
-	
-    CBitcoinAddress developerfeeaddress("GN7fZCAid5wTg1H67uz7bWv8pa5g7pNqDX");
-    CScript developerfeescriptpubkey = GetScriptForDestination(developerfeeaddress.Get());
+    CAmount blockValue = GetBlockValue(pindexPrev->nHeight + 1);
+    CAmount masternodePayment = GetMasternodePayment(pindexPrev->nHeight + 1, blockValue);
+    if((pindexPrev->nHeight + 1) > 20000) {
+        enforceDevFee = true;
+    }
+
+    if(enforceDevFee){
+    developerfeePayment = blockValue * 0.05;
+
+    CBitcoinAddress developerfeeaddress("CZD5YEgjvoJBjUGPkejynSfA3Jv8EKP7SZ");
+    developerfeescriptpubkey = GetScriptForDestination(developerfeeaddress.Get());
+    }
 
     if (hasPayment) {
         if (fProofOfStake) {
@@ -318,38 +325,51 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
             txNew.vout.resize(i + 2);
             txNew.vout[i].scriptPubKey = payee;
             txNew.vout[i].nValue = masternodePayment;
-			
-			txNew.vout[i+1].scriptPubKey = developerfeescriptpubkey;
-            txNew.vout[i+1].nValue = developerfeePayment;
+            if(enforceDevFee){
+                txNew.vout[i + 1].scriptPubKey = developerfeescriptpubkey;
+                txNew.vout[i + 1].nValue = developerfeePayment;
+            }
 			
             //subtract mn payment from the stake reward
             txNew.vout[i - 1].nValue -= masternodePayment;
-			txNew.vout[i - 1].nValue -= developerfeePayment;
+            if(enforceDevFee) {
+                txNew.vout[i - 1].nValue -= developerfeePayment;
+            }
 			LogPrintf("fProofOfStake: masternode to pay value %u\n", masternodePayment);
         } else {
             txNew.vout.resize(3);
             txNew.vout[1].scriptPubKey = payee;
             txNew.vout[1].nValue = masternodePayment;
 			LogPrintf("CreateNewBlock: masternode to pay value %u\n", masternodePayment);
-			
-            txNew.vout[2].scriptPubKey = developerfeescriptpubkey;
-            txNew.vout[2].nValue = developerfeePayment;
-			LogPrintf("CreateNewBlock: developerfee to pay value %u\n", developerfeePayment);
-			
-            txNew.vout[0].nValue = blockValue - developerfeePayment - masternodePayment;
+            if(enforceDevFee) {
+                txNew.vout[2].scriptPubKey = developerfeescriptpubkey;
+                txNew.vout[2].nValue = developerfeePayment;
+                LogPrintf("CreateNewBlock: developerfee to pay value %u\n", developerfeePayment);
+            }
+            if(enforceDevFee) {
+                txNew.vout[0].nValue = blockValue - developerfeePayment - masternodePayment;
+            }else{
+                txNew.vout[0].nValue = blockValue  - masternodePayment;
+            }
 			LogPrintf("CreateNewBlock: blockvalue to pay value %u\n", blockValue);
         }
 
-        CTxDestination address1;
-        ExtractDestination(payee, address1);
-        CBitcoinAddress address2(address1);
 
-		CTxDestination addressdevfee1;
-        ExtractDestination(developerfeescriptpubkey, addressdevfee1);
-        CBitcoinAddress addressdevfee2(addressdevfee1);
-		
-        LogPrintf("Masternode payment of %s to %s\n", FormatMoney(masternodePayment).c_str(), address2.ToString().c_str());
-		LogPrintf("Developer-Fee payment of %s to %s\n", FormatMoney(developerfeePayment).c_str(), addressdevfee2.ToString().c_str());
+
+        if(enforceDevFee) {
+            CTxDestination addressdevfee1;
+            ExtractDestination(developerfeescriptpubkey, addressdevfee1);
+            CBitcoinAddress addressdevfee2(addressdevfee1);
+
+            LogPrintf("Developer-Fee payment of %s to %s\n", FormatMoney(developerfeePayment).c_str(),
+                      addressdevfee2.ToString().c_str());
+        }else{
+            CTxDestination address1;
+            ExtractDestination(payee, address1);
+            CBitcoinAddress address2(address1);
+            LogPrintf("Masternode payment of %s to %s\n", FormatMoney(masternodePayment).c_str(), address2.ToString().c_str());
+
+        }
     }
 }
 
