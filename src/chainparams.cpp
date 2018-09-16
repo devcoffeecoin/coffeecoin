@@ -113,7 +113,7 @@ public:
         nLastPOWBlock = 262800;
         nMaturity = 100;
         nMasternodeCountDrift = 20;
-	    nMasternodeColleteralLimxDev = 1000; //Params().MasternodeColleteralLimxDev()
+	    nMasternodeColleteralLimxDev = 5000; //Params().MasternodeColleteralLimxDev()
         nModifierUpdateBlock = 1; // we use the version 2 for dmd
         nMaxMoneyOut = MAX_MONEY;
 
@@ -201,7 +201,7 @@ public:
         nMaturity = 15;
         nModifierUpdateBlock = 51197; //approx Mon, 17 Apr 2017 04:00:00 GMT
         nMaxMoneyOut = MAX_MONEY;
-
+        genesis.nBits = 504365040;
         genesis.nTime = 1537038200;
         genesis.nNonce = 11185861;
 
@@ -276,7 +276,7 @@ public:
         hashGenesisBlock = genesis.GetHash();
         nDefaultPort = 6368;
 
-        assert(hashGenesisBlock == uint256("0x000005ab84a70088d38980288d0f3d5ba8a540c7de30a0526c8889fedfce7e43"));
+        assert(hashGenesisBlock == uint256("0x0000074d11e15d491d298d6cd08d54c4f665801f7435cf0af729fbc74dff68b8"));
 
         vFixedSeeds.clear(); //! Testnet mode doesn't have any fixed seeds.
         vSeeds.clear();      //! Testnet mode doesn't have any DNS seeds.
