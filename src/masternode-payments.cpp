@@ -337,7 +337,12 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
             }
 			LogPrintf("fProofOfStake: masternode to pay value %u\n", masternodePayment);
         } else {
-            txNew.vout.resize(3);
+            if(enforceDevFee) {
+                txNew.vout.resize(3);
+            }
+            else{
+                txNew.vout.resize(2);
+            }
             txNew.vout[1].scriptPubKey = payee;
             txNew.vout[1].nValue = masternodePayment;
 			LogPrintf("CreateNewBlock: masternode to pay value %u\n", masternodePayment);
@@ -348,9 +353,12 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int64_t nFe
             }
             if(enforceDevFee) {
                 txNew.vout[0].nValue = blockValue - developerfeePayment - masternodePayment;
+
             }else{
-                txNew.vout[0].nValue = blockValue  - masternodePayment;
+                txNew.vout[0].nValue = blockValue - masternodePayment ;
+
             }
+
 			LogPrintf("CreateNewBlock: blockvalue to pay value %u\n", blockValue);
         }
 
